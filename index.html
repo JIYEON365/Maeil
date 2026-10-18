@@ -70,6 +70,7 @@ img{max-width:100%;height:auto}.card{overflow:hidden;min-width:0}
 #lst .card img{width:100%;max-height:340px;object-fit:cover;border-radius:14px;margin-top:8px;display:block}
 input[type=time],input[type=number]{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:6px 8px}
 .tb{color:var(--acc);font-weight:700}
+.f{flex-wrap:wrap}.f span{min-width:40%}
 </style>
 </head>
 <body>
@@ -78,7 +79,7 @@ input[type=time],input[type=number]{font:inherit;font-size:14px;border:1px solid
 <script>
 var K='maeil-v1',S={};
 try{S=JSON.parse(localStorage.getItem(K))||{}}catch(e){}
-S.focus=S.focus||{};S.routines=S.routines||['스페인어','운동','스터디'];S.chk=S.chk||{};S.energy=S.energy||{};S.rest=S.rest||{};S.diary=S.diary||[];S.inbox=S.inbox||[];S.rec=S.rec||[];S.recDone=S.recDone||{};S.min=S.min||{};S.win=S.win||{};S.rev=S.rev||{};
+S.focus=S.focus||{};S.routines=S.routines||['스페인어','운동','스터디'];S.chk=S.chk||{};S.energy=S.energy||{};S.rest=S.rest||{};S.diary=S.diary||[];S.inbox=S.inbox||[];S.rec=S.rec||[];S.recDone=S.recDone||{};S.todo=S.todo||{};S.min=S.min||{};S.win=S.win||{};S.rev=S.rev||{};
 function save(){try{localStorage.setItem(K,JSON.stringify(S));return true}catch(e){alert('저장 공간이 부족해요. 오래된 사진을 지워 주세요.');return false}}
 var ds=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 var pd=s=>new Date(s+'T00:00:00');
@@ -97,9 +98,9 @@ h+='<div class="tools"><label class="pk">날짜 이동<input type="date" value="
 h+='<section class="card"><h2>오늘의 초점<small>딱 3가지만</small></h2>';
 F.map((f,i)=>i).sort((a,b)=>(F[a].time||'99').localeCompare(F[b].time||'99')||a-b).forEach((i,k)=>{var f=F[i];h+='<div class="f'+(f.d?' done':'')+'"><button class="ck'+(f.d?' on':'')+'" onclick="tog('+i+')">'+(f.d?'✓':k+1)+'</button><span onclick="edF('+i+')">'+(f.time?'<b class="tb">'+f.time+'</b> ':'')+esc(f.t)+'</span><button class="x" onclick="tmF('+i+')">시간</button><button class="x" onclick="delF('+i+')">삭제</button></div>'});
 if(F.length<3)h+='<div class="row" style="margin-top:8px"><input type="text" id="fi" placeholder="가장 중요한 한 가지" onkeydown="if(event.key==\'Enter\')addF()"><button class="pri" onclick="addF()">추가</button></div><label class="pk" style="margin-top:8px">시간이 중요하면 <input type="time" id="ft"></label>';
-else h+='<div class="msg">3가지면 충분해요. 나머지는 내일의 나에게 맡겨요.</div>';
+else h+='<div class="msg">가장 중요한 3가지가 정해졌어요. 나머지는 아래 ‘그 밖의 할 일’에 적어두세요.</div>';
 if(F.length&&F.every(f=>f.d))h+='<div class="msg">모두 마쳤어요. 정말 수고했어요.</div>';
-h+='</section>'+recH()+'<section class="card"><h2>나중에 주머니<small>지금 안 해도 되는 것들</small></h2><div class="row"><input type="text" id="ii" placeholder="떠오른 건 일단 여기에" onkeydown="if(event.key==\'Enter\')addI()"><button class="pri" onclick="addI()">담기</button></div>';
+h+='</section>'+todoH()+recH()+'<section class="card"><h2>나중에 주머니<small>지금 안 해도 되는 것들</small></h2><div class="row"><input type="text" id="ii" placeholder="떠오른 건 일단 여기에" onkeydown="if(event.key==\'Enter\')addI()"><button class="pri" onclick="addI()">담기</button></div>';
 S.inbox.forEach(x=>{h+='<div class="mr"><span>'+esc(x.t)+'</span><button class="x" onclick="inF('+x.id+')">초점으로</button><button class="x" onclick="delI('+x.id+')">삭제</button></div>'});
 h+='</section><section class="card"><h2>자기계발<small>최소 버전도 충분해요</small></h2><div class="chips">';
 S.routines.forEach((r,i)=>{var v=C[r];h+='<button class="chip'+(v==2?' half':v?' on':'')+'" onclick="chk('+i+')">'+(v==2?'◐ 최소 · ':v?'✓ ':'')+esc(r)+'</button>'});
@@ -174,7 +175,7 @@ function nb(t,a,b){var s='style="font-size:24px;padding:0 10px"';return '<div cl
 function vRev(){var d=pd(sel),ws=new Date(d);ws.setDate(d.getDate()-d.getDay());var we=new Date(ws);we.setDate(ws.getDate()+6),f=x=>(x.getMonth()+1)+'.'+x.getDate();
 return '<h2 style="margin:20px 4px 0;font-size:22px">돌아보기</h2><section class="card">'+nb('주간 · '+f(ws)+' ~ '+f(we),'go(-7)','go(7)')+sumH(rng(ws,we))+rv('w:'+ds(ws),QW)+'</section><section class="card">'+nb('월간 · '+d.getFullYear()+'년 '+(d.getMonth()+1)+'월','gm(-1)','gm(1)')+sumH(rng(new Date(d.getFullYear(),d.getMonth(),1),new Date(d.getFullYear(),d.getMonth()+1,0)))+rv('m:'+ds(d).slice(0,7),QM)+'</section>'}
 function bk(){var t=JSON.stringify(S),b=document.getElementById('bkt');b.value=t;b.select();var m='백업 코드를 복사했어요. 메모 앱 등에 붙여넣어 보관하세요.',m2='아래 칸의 내용을 직접 전체 복사해 주세요.';try{navigator.clipboard.writeText(t).then(()=>alert(m),()=>alert(m2))}catch(e){alert(m2)}}
-function rstr(){try{var o=JSON.parse(document.getElementById('bkt').value.trim());if(!o.focus||!o.diary)throw 0;if(!confirm('현재 기록이 백업 내용으로 바뀌어요. 계속할까요?'))return;S=o;['focus','chk','energy','rest','win','rev','min','recDone'].forEach(k=>S[k]=S[k]||{});S.inbox=S.inbox||[];S.routines=S.routines||[];S.rec=S.rec||[];save();render()}catch(e){alert('백업 코드를 확인해 주세요.')}}
+function rstr(){try{var o=JSON.parse(document.getElementById('bkt').value.trim());if(!o.focus||!o.diary)throw 0;if(!confirm('현재 기록이 백업 내용으로 바뀌어요. 계속할까요?'))return;S=o;['focus','chk','energy','rest','win','rev','min','recDone','todo'].forEach(k=>S[k]=S[k]||{});S.inbox=S.inbox||[];S.routines=S.routines||[];S.rec=S.rec||[];save();render()}catch(e){alert('백업 코드를 확인해 주세요.')}}
 function drawL(){var l=document.getElementById('lst');if(!l)return;var s=q.trim().toLowerCase(),L=S.diary.slice().sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:b.id-a.id).filter(e=>(!s||(e.text+(S.win[e.date]||'')).toLowerCase().includes(s))&&(!po||e.photo)),h='<div class="q" style="text-align:left;margin:4px">'+L.length+'개의 조각</div>',last='';
 if(po)h+='<div class="pg">'+L.map(e=>'<img src="'+e.photo+'" onclick="jump(\''+e.date+'\')">').join('')+'</div>';
 else L.forEach(e=>{if(e.date!=last){h+='<div class="gh">'+e.date.replace(/-/g,'. ')+' ('+WD[pd(e.date).getDay()]+')</div>'+(S.win[e.date]?'<div class="sm" style="margin:2px 4px">★ '+esc(S.win[e.date])+'</div>':'');last=e.date}h+='<section class="card" style="margin:8px 0">'+entry(e,1).replace('<div class="ent">','<div>')+'</section>'});
@@ -216,6 +217,17 @@ function rF(id){var r=S.rec.find(x=>x.id==id),F=S.focus[sel]=S.focus[sel]||[];if
 
 function addF(){var v=document.getElementById('fi').value.trim();if(!v)return;var t=document.getElementById('ft').value||'';(S.focus[sel]=S.focus[sel]||[]).push({t:v,d:0,time:t});save();render()}
 function tmF(i){var f=S.focus[sel][i],v=prompt('시간을 24시간 형식으로 입력해 주세요 (예: 14:30)\n비우면 시간이 지워져요',f.time||'');if(v===null)return;v=v.trim();if(!v){f.time=''}else{var m=v.match(/^(\d{1,2}):(\d{2})$/);if(!m||+m[1]>23||+m[2]>59){alert('14:30 처럼 입력해 주세요.');return}f.time=m[1].padStart(2,'0')+':'+m[2]}save();render()}
+
+function askT(o){var v=prompt('시간을 24시간 형식으로 입력해 주세요 (예: 14:30)\n비우면 시간이 지워져요',o.time||'');if(v===null)return false;v=v.trim();if(!v){o.time='';return true}var m=v.match(/^(\d{1,2}):(\d{2})$/);if(!m||+m[1]>23||+m[2]>59){alert('14:30 처럼 입력해 주세요.');return false}o.time=m[1].padStart(2,'0')+':'+m[2];return true}
+function todoH(){var L=S.todo[sel]||[],F=S.focus[sel]||[],h='<section class="card"><h2>그 밖의 할 일<small>개수 제한 없이</small></h2>';
+L.map((x,i)=>i).sort((a,b)=>(L[a].time||'99').localeCompare(L[b].time||'99')||a-b).forEach(i=>{var x=L[i];h+='<div class="f'+(x.d?' done':'')+'"><button class="ck'+(x.d?' on':'')+'" onclick="tgT('+i+')">'+(x.d?'✓':'·')+'</button><span onclick="edT('+i+')">'+(x.time?'<b class="tb">'+x.time+'</b> ':'')+esc(x.t)+'</span>'+(F.length<3&&!x.d?'<button class="x" onclick="prT('+i+')">초점으로</button>':'')+'<button class="x" onclick="tmT('+i+')">시간</button><button class="x" onclick="dlT('+i+')">삭제</button></div>'});
+return h+'<div class="row" style="margin-top:8px"><input type="text" id="ti" placeholder="이 밖에 해야 할 일" onkeydown="if(event.key==\'Enter\')addT()"><button class="pri" onclick="addT()">추가</button></div><label class="pk" style="margin-top:8px">시간이 중요하면 <input type="time" id="tt"></label></section>'}
+function addT(){var v=document.getElementById('ti').value.trim();if(!v)return;(S.todo[sel]=S.todo[sel]||[]).push({t:v,d:0,time:document.getElementById('tt').value||''});save();render()}
+function tgT(i){S.todo[sel][i].d=S.todo[sel][i].d?0:1;save();render()}
+function edT(i){var v=prompt('내용 수정',S.todo[sel][i].t);if(v&&v.trim()){S.todo[sel][i].t=v.trim();save();render()}}
+function dlT(i){S.todo[sel].splice(i,1);save();render()}
+function tmT(i){if(askT(S.todo[sel][i])){save();render()}}
+function prT(i){var F=S.focus[sel]=S.focus[sel]||[];if(F.length>=3){alert('초점은 3개까지만 담아요.');return}var x=S.todo[sel].splice(i,1)[0];F.push({t:x.t,d:0,time:x.time||''});save();render()}
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')}catch(e){}
 tab(0);
 </script>
